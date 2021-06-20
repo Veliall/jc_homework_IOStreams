@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Main {
@@ -58,7 +59,8 @@ public class Main {
             System.out.println("Произошла ошибка при сохранении");
         }
 
-        if (zipFiles(pathSaveGames + "save.zip",
+        String pathSaveZip = pathSaveGames + "save.zip";
+        if (zipFiles(pathSaveZip,
                 pathGP1,
                 pathGP2,
                 pathGP3)) {
@@ -66,6 +68,9 @@ public class Main {
         } else {
             System.out.println("Произошла ошибка архивации");
         }
+
+        openZip(pathSaveZip, pathSaveGames);
+        System.out.println(openProgress(pathGP1));
 
     }
 
@@ -127,6 +132,36 @@ public class Main {
         for (String filePath : args) {
             new File(filePath).delete();
         }
+    }
+
+    public static void openZip(String filePath, String outputDirPath) {
+        try (ZipInputStream zin = new ZipInputStream(new FileInputStream(filePath))) {
+            ZipEntry entry;
+            String name;
+            while ((entry = zin.getNextEntry()) != null) {
+                name = entry.getName();
+                FileOutputStream fout = new FileOutputStream(outputDirPath + "/" + name);
+                for (int c = zin.read(); c != -1; c = zin.read()) {
+                    fout.write(c);
+                }
+                fout.flush();
+                zin.closeEntry();
+                fout.close();
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static GameProgress openProgress(String filePath) {
+        GameProgress gameProgress = null;
+        try (FileInputStream fis = new FileInputStream(filePath);
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+            gameProgress = (GameProgress) ois.readObject();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return gameProgress;
     }
 
 }
