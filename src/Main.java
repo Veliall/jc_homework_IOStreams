@@ -96,7 +96,7 @@ public class Main {
         return newDirCreated;
     }
 
-    public static boolean saveGame(String dirPath, GameProgress gameProgress) {
+    private static boolean saveGame(String dirPath, GameProgress gameProgress) {
         try (FileOutputStream fos = new FileOutputStream(dirPath);
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(gameProgress);
@@ -107,7 +107,7 @@ public class Main {
         return true;
     }
 
-    public static boolean zipFiles(String dirPath, String... args) {
+    private static boolean zipFiles(String dirPath, String... args) {
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(dirPath))) {
             for (String filePath : args) {
                 File file = new File(filePath);
@@ -128,13 +128,13 @@ public class Main {
         return true;
     }
 
-    public static void deleteZipedFiles(String... args) {
+    private static void deleteZipedFiles(String... args) {
         for (String filePath : args) {
             new File(filePath).delete();
         }
     }
 
-    public static void openZip(String filePath, String outputDirPath) {
+    private static void openZip(String filePath, String outputDirPath) {
         try (ZipInputStream zin = new ZipInputStream(new FileInputStream(filePath))) {
             ZipEntry entry;
             String name;
@@ -153,7 +153,7 @@ public class Main {
         }
     }
 
-    public static GameProgress openProgress(String filePath) {
+    private static GameProgress openProgress(String filePath) {
         GameProgress gameProgress = null;
         try (FileInputStream fis = new FileInputStream(filePath);
              ObjectInputStream ois = new ObjectInputStream(fis)) {
