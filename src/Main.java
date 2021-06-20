@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class Main {
 
@@ -31,6 +33,40 @@ public class Main {
             e.printStackTrace();
         }
 
+        GameProgress gameProgress1 = new GameProgress(100, 1, 1, 100);
+        GameProgress gameProgress2 = new GameProgress(200, 2, 2, 200);
+        GameProgress gameProgress3 = new GameProgress(300, 3, 3, 300);
+
+        String pathSaveGames = "Z://Games/saveGames/";
+        String pathGP1 = pathSaveGames + "gameProgress1.dat";
+        String pathGP2 = pathSaveGames + "gameProgress2.dat";
+        String pathGP3 = pathSaveGames + "gameProgress3.dat";
+
+        if (saveGame(pathGP1, gameProgress1)) {
+            System.out.println("Игра сохранена");
+        } else {
+            System.out.println("Произошла ошибка при сохранении");
+        }
+        if (saveGame(pathGP2, gameProgress2)) {
+            System.out.println("Игра сохранена");
+        } else {
+            System.out.println("Произошла ошибка при сохранении");
+        }
+        if (saveGame(pathGP3, gameProgress3)) {
+            System.out.println("Игра сохранена");
+        } else {
+            System.out.println("Произошла ошибка при сохранении");
+        }
+
+        if (zipFiles(pathSaveGames + "save.zip",
+                pathGP1,
+                pathGP2,
+                pathGP3)) {
+            System.out.println("Файлы сохранений заархивированы");
+        } else {
+            System.out.println("Произошла ошибка архивации");
+        }
+
     }
 
     private static boolean newFile(String dirPath, String fileName) {
@@ -53,6 +89,44 @@ public class Main {
             e.printStackTrace();
         }
         return newDirCreated;
+    }
+
+    public static boolean saveGame(String dirPath, GameProgress gameProgress) {
+        try (FileOutputStream fos = new FileOutputStream(dirPath);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(gameProgress);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean zipFiles(String dirPath, String... args) {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(dirPath))) {
+            for (String filePath : args) {
+                File file = new File(filePath);
+                FileInputStream fis = new FileInputStream(file);
+                ZipEntry entry = new ZipEntry(file.getName());
+                zos.putNextEntry(entry);
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+                zos.write(buffer);
+                fis.close();
+                zos.closeEntry();
+            }
+            deleteZipedFiles(args);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public static void deleteZipedFiles(String... args) {
+        for (String filePath : args) {
+            new File(filePath).delete();
+        }
     }
 
 }
